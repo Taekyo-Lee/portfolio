@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>harness-interop · Claude Code 와 OpenCode 를 한 팀처럼</title>
+<style>
+  .viz-root {
+    --page:#f9f9f7; --surface-1:#fcfcfb; --surface-2:#f3f2ee; --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#898781;
+    --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --cc:#2a78d6; --oc:#1baf7a; --ours:#4a3aa7;
+    --cc-wash:rgba(42,120,214,0.08); --oc-wash:rgba(27,175,122,0.08); --ours-wash:rgba(74,58,167,0.07);
+    --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+    --good-wash:rgba(12,163,12,0.09); --crit-wash:rgba(208,59,59,0.08); --warn-wash:rgba(250,178,25,0.10);
+    --shadow:rgba(11,11,11,0.07);
+  }
+  @media (prefers-color-scheme: dark) {
+    .viz-root {
+      --page:#0d0d0d; --surface-1:#1a1a19; --surface-2:#161615; --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#898781;
+      --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+      --cc:#3987e5; --oc:#199e70; --ours:#9085e9;
+      --cc-wash:rgba(57,135,229,0.12); --oc-wash:rgba(25,158,112,0.12); --ours-wash:rgba(144,133,233,0.12);
+      --good:#28c028; --warning:#fab219; --critical:#f0655f;
+      --good-wash:rgba(40,192,40,0.12); --crit-wash:rgba(240,101,95,0.11); --warn-wash:rgba(250,178,25,0.10);
+      --shadow:rgba(0,0,0,0.4);
+    }
+  }
+  * { box-sizing:border-box; }
+  body.viz-root { margin:0; background:var(--page); color:var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-size:14px; line-height:1.55; }
+  a { color:inherit; text-decoration:none; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .wrap { max-width:1020px; margin:0 auto; padding:40px 20px 64px; }
+
+  /* hero */
+  .eyebrow { font-size:12.5px; font-weight:700; letter-spacing:.04em; color:var(--text-muted); }
+  .eyebrow .cc { color:var(--cc); } .eyebrow .oc { color:var(--oc); }
+  .herorow { display:flex; align-items:center; gap:16px; margin:14px 0 4px; }
+  .hlogo { width:58px; height:58px; border-radius:15px; background:var(--ours); color:#fff;
+           display:flex; align-items:center; justify-content:center; font-size:30px; flex:none; }
+  h1.hname { margin:0; font-size:46px; font-weight:800; letter-spacing:-.02em; line-height:1;
+             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  @media (max-width:560px){ h1.hname { font-size:34px; } }
+  .htag { font-size:20px; font-weight:700; margin:14px 0 2px; color:var(--text-primary); }
+  .htag em { color:var(--ours); font-style:normal; }
+  .hen { font-size:14px; font-style:italic; font-weight:600; color:var(--text-secondary); }
+  .lead { font-size:14.5px; color:var(--text-secondary); max-width:760px; margin:16px 0 0; line-height:1.6; }
+  .lead b { color:var(--text-primary); }
+
+  h2.sect { font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin:44px 0 12px; font-weight:800; }
+
+  /* flagship (memory-semiconductor security hook) */
+  .flagship { border:1px solid var(--critical); border-radius:14px; padding:22px 24px; background:var(--crit-wash); }
+  .fl-tag { font-size:11px; font-weight:800; letter-spacing:.06em; color:var(--critical); text-transform:uppercase; }
+  .fl-headline { font-size:23px; font-weight:800; line-height:1.35; margin:8px 0 12px; }
+  .fl-headline b { color:var(--critical); }
+  @media (max-width:560px){ .fl-headline { font-size:19px; } }
+  .fl-body { font-size:13px; color:var(--text-secondary); margin:0 0 12px; line-height:1.65; }
+  .fl-body b { color:var(--text-primary); }
+  .fl-answer { font-size:14px; margin:0; line-height:1.6; color:var(--text-secondary); }
+  .fl-answer b { color:var(--text-primary); }
+  .fl-answer a { color:var(--critical); font-weight:800; white-space:nowrap; }
+
+  /* productivity proof band */
+  .proof { border:1px solid var(--border); border-radius:14px; padding:20px 22px; background:var(--surface-2); margin-bottom:10px; }
+  .proof-lead { font-size:16.5px; font-weight:800; }
+  .proof-sub { font-size:12.5px; color:var(--text-muted); margin-top:2px; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:16px 0 14px; }
+  @media (max-width:640px){ .stats { grid-template-columns:1fr; gap:12px; } }
+  .stat { border-left:2px solid var(--ours); padding-left:13px; }
+  .sn { font-size:30px; font-weight:800; color:var(--ours); letter-spacing:-.02em; line-height:1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .sl { font-size:13px; font-weight:700; margin-top:5px; }
+  .ss { font-size:11px; color:var(--text-muted); margin-top:3px; line-height:1.45; }
+  .proof-note { font-size:11.5px; color:var(--text-secondary); border-top:1px solid var(--grid); padding-top:11px; }
+  .proof-src { font-size:10.5px; color:var(--text-muted); margin-top:6px; }
+  .proof-src a { color:var(--text-secondary); }
+  .hero-illus { display:block; width:100%; height:auto; border-radius:14px; margin-top:14px; }
+
+  /* concept band */
+  .concept { display:grid; grid-template-columns:1fr 40px 1fr 40px 1fr; gap:6px; align-items:stretch; }
+  @media (max-width:720px){ .concept { grid-template-columns:1fr; } .concept .op { transform:rotate(90deg); } }
+  .czone { border:1px solid var(--border); border-radius:12px; padding:14px 16px; background:var(--surface-1); }
+  .czone.cc { border-color:var(--cc); } .czone.oc { border-color:var(--oc); } .czone.sum { border-color:var(--ours); background:var(--ours-wash); }
+  .czone .zh { font-weight:800; font-size:13.5px; } .czone.cc .zh { color:var(--cc); } .czone.oc .zh { color:var(--oc); } .czone.sum .zh { color:var(--ours); }
+  .czone .zs { font-size:12px; color:var(--text-secondary); margin-top:5px; }
+  .concept .op { align-self:center; text-align:center; font-size:22px; font-weight:800; color:var(--text-muted); }
+
+  /* plugin cards */
+  .plugins { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:720px){ .plugins { grid-template-columns:1fr; } }
+  a.plugin { display:flex; flex-direction:column; border:1px solid var(--border); border-top:3px solid var(--baseline);
+             border-radius:14px; padding:20px 18px 16px; background:var(--surface-1);
+             transition:transform .13s ease, border-color .13s ease, box-shadow .13s ease; }
+  a.plugin:hover { transform:translateY(-3px); box-shadow:0 10px 26px var(--shadow); }
+  a.plugin.cs { border-top-color:var(--critical); } a.plugin.ab { border-top-color:var(--ours); } a.plugin.cp { border-top-color:var(--oc); }
+  .pl-ico { width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:23px; flex:none; }
+  .plugin.cs .pl-ico { background:var(--crit-wash); } .plugin.ab .pl-ico { background:var(--ours-wash); } .plugin.cp .pl-ico { background:var(--oc-wash); }
+  .pl-name { font-size:20px; font-weight:800; margin:12px 0 1px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .pl-cat { font-size:11px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; }
+  .plugin.cs .pl-cat { color:var(--critical); } .plugin.ab .pl-cat { color:var(--ours); } .plugin.cp .pl-cat { color:var(--oc); }
+  .pl-tag { font-size:14.5px; font-weight:700; margin:10px 0 4px; }
+  .pl-desc { font-size:12.5px; color:var(--text-secondary); flex:1; line-height:1.5; }
+  .pl-more { font-size:12.5px; font-weight:700; margin-top:14px; color:var(--ours); }
+
+  /* architecture */
+  .arch { border:1px solid var(--border); border-left:3px solid var(--ours); border-radius:12px; padding:18px 20px; background:var(--surface-1); }
+  .arch h3 { margin:0 0 8px; font-size:15px; }
+  .arch p { margin:0; font-size:13px; color:var(--text-secondary); line-height:1.6; }
+  .arch b { color:var(--text-primary); }
+  .arch .em { color:var(--ours); font-weight:700; }
+  .props { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; }
+  .prop { font-size:11.5px; font-weight:700; border:1px solid var(--baseline); border-radius:999px; padding:3px 11px; color:var(--text-secondary); }
+
+  footer { color:var(--text-muted); font-size:12px; margin-top:44px; line-height:1.7; border-top:1px solid var(--grid); padding-top:16px; }
+  footer code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+
+  <!-- hero -->
+  <header>
+    <div class="eyebrow">Open-source framework · <span class="cc">Claude Code</span> ↔ <span class="oc">OpenCode</span></div>
+    <div class="herorow">
+      <span class="hlogo">🔗</span>
+      <h1 class="hname">harness-interop</h1>
+    </div>
+    <p class="htag">혼자 쓰던 두 하니스를, <em>한 팀처럼.</em></p>
+    <div class="hen">Make Claude Code and OpenCode work as one team.</div>
+    <p class="lead">AI 코딩 하니스 <b>Claude Code</b> 와 <b>OpenCode</b> 를 상호운용시키는 프레임워크입니다. 중앙 서버도 상주 데몬도 없는 <b>순수 파일</b>로 동작해서, 데몬·서버가 필요한 도구는 못 들어가는 <b>폐쇄된 보안망에도 그대로 들어갑니다.</b></p>
+  </header>
+
+  <!-- proof: AI coding harnesses boost productivity -->
+  <div class="proof">
+    <div class="proof-lead">AI 코딩 하니스는, 이미 개발의 표준이 되었습니다.</div>
+    <div class="proof-sub">그 효과는 통제된 연구로 입증됐습니다.</div>
+    <div class="stats">
+      <div class="stat">
+        <div class="sn">55%</div>
+        <div class="sl">더 빠른 작업 완료</div>
+        <div class="ss">GitHub 통제 실험 · 같은 과제 2h41m → 1h11m · 완료율 70%→78%</div>
+      </div>
+      <div class="stat">
+        <div class="sn">76%</div>
+        <div class="sl">개발자가 AI 도구 사용·도입 예정</div>
+        <div class="ss">전문 개발자 62% 사용 중 · Stack Overflow 2024 설문(65,000+명)</div>
+      </div>
+      <div class="stat">
+        <div class="sn">16~45%</div>
+        <div class="sl">고성과 조직의 생산성·품질 향상</div>
+        <div class="ss">McKinsey · 워크플로 재설계가 전제</div>
+      </div>
+    </div>
+    <div class="proof-note">효과는 작업·팀·숙련도에 따라 다르지만, 이 도구가 개발의 표준이 되었다는 데에는 이견이 없습니다.</div>
+    <div class="proof-src">출처 · <a href="https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/" target="_blank" rel="noopener">GitHub 연구</a> · <a href="https://arxiv.org/abs/2302.06590" target="_blank" rel="noopener">arXiv 2302.06590</a> · <a href="https://survey.stackoverflow.co/2024/ai" target="_blank" rel="noopener">Stack Overflow 2024</a> · <a href="https://www.mckinsey.com/capabilities/tech-and-ai/our-insights/unleashing-developer-productivity-with-generative-ai" target="_blank" rel="noopener">McKinsey</a></div>
+  </div>
+
+  <!-- flagship: memory-semiconductor security -->
+  <h2 class="sect" style="color:var(--critical)">가장 중요한 활용 · 메모리 반도체 보안 환경</h2>
+  <div class="flagship">
+    <div class="fl-tag">국가핵심기술 · 산업기술보호법</div>
+    <div class="fl-headline">메모리 핵심기술 엔지니어는 <b>cloud AI 를 못 씁니다.</b></div>
+    <p class="fl-body">메모리는 <b>국가핵심기술</b>로 지정돼 해외 cloud 로의 반출이 법으로 금지됩니다 · 회사 NDA 로도 풀 수 없습니다. 정당한 비기밀 질문조차 권한이 없어, 엔지니어는 때로는 사내 PC 를 두고 개인폰에 손으로 쳐서 묻습니다 · <b>아무도 통제·감사하지 못한 채로.</b></p>
+    <p class="fl-answer"><b>harness-interop 은 그 금지가 만든 공백을, 통제된 채널로 메웁니다.</b> 지능은 들여오고 기밀은 못 나가는 단방향 다리로 · 금지됐던 cloud 생산성을 사고 위험 없이 보안 환경 안으로. <a href="co-session/PITCH.html">→ co-session 으로 자세히</a></p>
+  </div>
+
+  <img class="hero-illus" src="images/security-hero.webp" alt="메모리 핵심기술 엔지니어의 보안 환경 · 통제된 채널로 cloud 지능만 안전하게 들이는 모습의 일러스트" loading="lazy">
+
+  <!-- concept -->
+  <h2 class="sect">왜 둘을 함께</h2>
+  <div class="concept">
+    <div class="czone cc"><div class="zh">☁ Claude Code</div><div class="zs">가장 앞선 cloud 모델로 똑똑합니다</div></div>
+    <div class="op">+</div>
+    <div class="czone oc"><div class="zh">🖥 OpenCode</div><div class="zs">오픈소스 · 로컬·사내 모델까지 자유롭게 붙일 수 있습니다</div></div>
+    <div class="op">=</div>
+    <div class="czone sum"><div class="zh">⚡ 한 팀</div><div class="zs">필요에 따라 골라 쓰되, <b>맥락·세션·안전을 공유</b>합니다. harness-interop 이 그 사이를 잇습니다.</div></div>
+  </div>
+
+  <!-- plugins -->
+  <h2 class="sect">세 플러그인</h2>
+  <div class="plugins">
+
+    <a class="plugin cs" href="co-session/PITCH.html">
+      <span class="pl-ico">🔒</span>
+      <div class="pl-name">co-session</div>
+      <div class="pl-cat">보안 채널</div>
+      <div class="pl-tag">보안 존 사이 통제된 세션 채널</div>
+      <div class="pl-desc">지능은 들여오고, 기밀은 못 나갑니다. 금지됐던 cloud AI 생산성을 게이트·감사로 통제해, 핵심기술 엔지니어에게도 안전하게 열어줍니다.</div>
+      <div class="pl-more">자세히 보기 →</div>
+    </a>
+
+    <a class="plugin ab" href="anchor-bridge/PITCH.html">
+      <span class="pl-ico">⚓</span>
+      <div class="pl-name">anchor-bridge</div>
+      <div class="pl-cat">맥락 연속성</div>
+      <div class="pl-tag">하니스를 바꿔도, 맥락은 따라온다</div>
+      <div class="pl-desc">팀 정책(AGENTS.md / CLAUDE.md)과 개인 메모리가 두 하니스 사이를 자동으로 양방향으로 따라옵니다. 설치는 한 번, 이후엔 자동입니다.</div>
+      <div class="pl-more">자세히 보기 →</div>
+    </a>
+
+    <a class="plugin cp" href="co-presence/PITCH.html">
+      <span class="pl-ico">👥</span>
+      <div class="pl-name">co-presence</div>
+      <div class="pl-cat">동시 편집 안전</div>
+      <div class="pl-tag">두 하니스가, 부딪히지 않게</div>
+      <div class="pl-desc">두 하니스가 같은 파일을 동시에 만질 때, 조용한 덮어쓰기 전에 서로를 보고 멈춥니다. 설치 후엔 자동입니다.</div>
+      <div class="pl-more">자세히 보기 →</div>
+    </a>
+
+  </div>
+
+  <img class="hero-illus" src="images/plugins-hero.webp" alt="Claude Code 와 OpenCode 가 한 팀이 되는 개념과 세 플러그인(co-session · anchor-bridge · co-presence)을 그린 일러스트" loading="lazy">
+
+  <!-- architecture -->
+  <h2 class="sect">왜 폐쇄된 보안망에도 설치할 수 있나</h2>
+  <div class="arch">
+    <h3>이 프레임워크는, 순수 파일뿐입니다.</h3>
+    <p>세 플러그인 모두 <b>순수 파일</b>로만 동작합니다. 상주 데몬도, 중앙 서버·DB도, 외부 네트워크 호출도 없습니다. 그래서 데몬형·서버형 도구는 반입 불가한 <b>폐쇄된 보안망</b>에도 그대로 들어가고, 오간 것은 <span class="em">git 으로 눈에 보이고 감사됩니다.</span></p>
+    <div class="props">
+      <span class="prop">상주 데몬 0</span>
+      <span class="prop">중앙 서버 0</span>
+      <span class="prop">순수 파일</span>
+      <span class="prop">프로젝트 로컬</span>
+      <span class="prop">git 투명</span>
+    </div>
+  </div>
+
+  <footer>
+    harness-interop · Claude Code 와 OpenCode 를 상호운용시키는 오픈소스 프레임워크입니다.<br>
+    각 플러그인 상세 = <code>co-session/PITCH.html</code> · <code>anchor-bridge/PITCH.html</code> · <code>co-presence/PITCH.html</code> · 문서 = <code>README.md</code>.
+  </footer>
+
+</div>
+</body>
+</html>
