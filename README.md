@@ -10,7 +10,7 @@
 - 🎓 **정보이론 박사** · 2016 · 오류정정부호·의사난수 수열, NAND 플래시 ECC 산학
 - 📡 **LG전자 MC 사업본부** · 2016~2021 · LTE/5G 스마트폰 RF 성능 최적화
 - 🤖 **LG전자 HS 사업본부** · 2021~2024 · 생성형 AI 선행연구·제품화 (LLM·RLHF·RAG·대화형 에이전트) · 🎤 **사내 AI 강사**
-- ⚡ **삼성전자 S.LSI 사업부** · 2024~ · AI Native·agentic 개발 자동화 · 🎤 **사내 AI 강사** (세미나 7종 · 1,000명+)
+- ⚡ **삼성전자 S.LSI 사업부** · 2024~ · AI Native·agentic 개발 자동화 · 🎤 **사내 AI 강사** (부문 및 사업부 단위 세미나 9종 · 1,000명+)
 
 ✍️ [TECH 블로그](https://taekyo-lee.github.io/ko/) · ▶️ [TECH 유튜브](https://www.youtube.com/@GuruCat-d4h)
 
@@ -29,7 +29,7 @@ Claude Code·OpenCode를 잇는 오픈소스 프레임워크 **harness-interop**
 박사·석사 연구 요약과 IEEE 제1저자 논문. 차세대 NAND 플래시 ECC 산학과제 상세 포함.
 
 ### 🎤 [사내 AI 강사 · LG·삼성 2개사 연속 →](lectures/)
-**대기업 2곳 연속** 사내 AI 강사 · 신입사원 AI 온보딩 강의.
+**대기업 2곳 연속** 사내 AI 강사 · 부문 및 사업부 단위 AI 세미나 9종(500+ 슬라이드) · 신입 온보딩 강의.
 
 ### 💼 [경험 →](experience/)
 대외 기술 블로그·유튜브(50+편) 심층 분석 · **DeepLearning.AI 글로벌 멘토**.
